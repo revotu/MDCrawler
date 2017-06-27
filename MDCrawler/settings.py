@@ -14,6 +14,7 @@ BOT_NAME = 'MDCrawler'
 SPIDER_MODULES = ['MDCrawler.spiders']
 NEWSPIDER_MODULE = 'MDCrawler.spiders'
 
+LOG_FILE="log.txt"
 
 # Crawl responsibly by identifying yourself (and your website) on the user-agent
 USER_AGENT = 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; Acoo Browser 1.98.744; .NET CLR 3.5.30729)'

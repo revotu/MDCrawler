@@ -69,7 +69,7 @@ class TiebaSpider(scrapy.Spider):
         if ':' in time:
             return datetime.now().strftime('%Y-%m-%d') + ' ' + time + ':00'
         elif '-' in time:
-            return datetime.now().year + '-' + time + ' ' + datetime.now().strftime('%H:%M:%S')
+            return str(datetime.now().year) + '-' + time + ' ' + datetime.now().strftime('%H:%M:%S')
 
     def _extract_forum_name(self, sel, item):
         tieba_name_xpath = '//a[@class="card_title_fname"]/text()'
