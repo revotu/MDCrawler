@@ -14,10 +14,14 @@ from MDCrawler.settings import MIN_REPLY_NUM,MAX_POSTS_NUM,PER_PAGE_NUM,\
 class TiebaSpider(scrapy.Spider):
     name = 'tieba'
     allowed_domains = ['tieba.baidu.com']
+    exsit_post_ids = []
 
     def start_requests(self):
         conn = MySQLdb.connect(host=MYSQL_HOST, user=MYSQL_USER, passwd=MYSQL_PASSWD, db=MYSQL_DBNAME, charset='utf8', use_unicode=True)
         cursor = conn.cursor(MySQLdb.cursors.DictCursor)
+        cursor.execute('SELECT post_id FROM tieba')
+        rows = cursor.fetchall()
+        self.exsit_post_ids = [row['post_id'] for row in rows]
         cursor.execute('SELECT tieba_link FROM tieba_link')
         rows = cursor.fetchall()
         for row in rows:
@@ -30,8 +34,14 @@ class TiebaSpider(scrapy.Spider):
         sel = Selector(response)
 
         domain = 'http://tieba.baidu.com'
-        links = sel.xpath('//span[@class="threadlist_rep_num center_text"][text() > $num]/../following-sibling::div//a[contains(@class,"j_th_tit")]/@href' ,num = MIN_REPLY_NUM).extract()
+        links = sel.xpath('//span[@class="threadlist_rep_num center_text"][text() > $num]/..\
+                            /following-sibling::div//a[contains(@class,"j_th_tit")]/@href' ,num = MIN_REPLY_NUM).extract()
+        links = links + sel.xpath('//i[contains(@title,$title)]/following-sibling::a/@href', title="置顶").extract()
+        links = links + re.findall('<a href="(.+?)" target="_blank" class="viewMore">',sel.response.body)
         for link in links:
+            post_id = re.findall('/p/(\d+)',link)[0]
+            if post_id in self.exsit_post_ids:
+                continue
             meta = {}
             label = sel.xpath('//a[@href=$link]/../i/@title', link=link).extract()
             if label:
@@ -39,7 +49,7 @@ class TiebaSpider(scrapy.Spider):
             last_reply_time = sel.xpath('//a[@href=$link]/../../..//span[@class="threadlist_reply_date pull_right j_reply_data"]/text()', link=link).extract_first()
             if last_reply_time:
                 meta['last_reply_time'] = last_reply_time.strip()
-            yield scrapy.Request(domain + link, callback=self.parse_item, meta=meta)
+            yield scrapy.Request(domain + '/p/' + post_id, callback=self.parse_item, meta=meta)
 
     def parse_item(self, response):
         sel = Selector(response)
