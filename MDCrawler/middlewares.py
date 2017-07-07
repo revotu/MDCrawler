@@ -5,7 +5,10 @@
 # See documentation in:
 # http://doc.scrapy.org/en/latest/topics/spider-middleware.html
 
+import base64
+import random
 from scrapy import signals
+from settings import PROXIES
 
 
 class MdcrawlerSpiderMiddleware(object):
@@ -54,3 +57,14 @@ class MdcrawlerSpiderMiddleware(object):
 
     def spider_opened(self, spider):
         spider.logger.info('Spider opened: %s' % spider.name)
+
+
+class ProxyMiddleware(object):
+    def process_request(self, request, spider):
+        proxy = random.choice(PROXIES)
+        request.meta['proxy'] = 'http://%s' % proxy['ip_port']
+        encoded_user_pass = base64.b64encode(proxy['user_pass'])
+        request.headers['Proxy-Authorization'] = 'Basic ' + encoded_user_pass
+        spider.logger.info('[ProxyMiddleware] proxy : %s is used for request url : %s' % (proxy, request.url))
+
+

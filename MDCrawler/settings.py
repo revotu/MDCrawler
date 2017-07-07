@@ -53,9 +53,9 @@ USER_AGENT = 'Mozilla/5.0 (compatible; MSIE 8.0; Windows NT 6.0; Trident/4.0; Ac
 
 # Enable or disable downloader middlewares
 # See http://scrapy.readthedocs.org/en/latest/topics/downloader-middleware.html
-#DOWNLOADER_MIDDLEWARES = {
-#    'MDCrawler.middlewares.MyCustomDownloaderMiddleware': 543,
-#}
+DOWNLOADER_MIDDLEWARES = {
+   'MDCrawler.middlewares.ProxyMiddleware': 543,
+}
 
 # Enable or disable extensions
 # See http://scrapy.readthedocs.org/en/latest/topics/extensions.html
@@ -104,3 +104,6 @@ MYSQL_PASSWD = ''
 MIN_REPLY_NUM = 100
 MAX_POSTS_NUM = 500
 PER_PAGE_NUM = 50
+
+PROXIES = [
+]
